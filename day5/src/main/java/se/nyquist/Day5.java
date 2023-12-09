@@ -70,7 +70,6 @@ public class Day5 {
                     List<Range> seedsRanges = IntStream.range(0, numberInput.length/2)
                             .mapToObj(i -> new Range(Long.parseLong(numberInput[2*i]), Long.parseLong(numberInput[2*i+1])))
                             .toList();
-                    System.out.println("Day 5 Exercise 2 numbers " + seedsRanges.stream().map(Range::length).reduce(Long::sum).orElse(0L));
                     var destinations2 = getNearestDestination2(seedsRanges, sections);
                     System.out.println("Day 5 Exercise 2: " + destinations2);
                 }
