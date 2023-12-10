@@ -12,10 +12,6 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-/**
- * Hello world!
- *
- */
 public class Day5 {
 
     enum Section {
