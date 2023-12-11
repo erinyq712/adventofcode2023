@@ -1,4 +1,4 @@
 package se.nyquist;
 
-public record Player(Hand hand, long bid) {
+public record Player<T extends Comparable<T>>(T hand, long bid) {
 }

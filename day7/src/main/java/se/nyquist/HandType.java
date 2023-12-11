@@ -3,20 +3,14 @@ package se.nyquist;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public enum HandType {
-    FIVE(6),
-    FOUR(5),
-    FULL_HOUSE(4),
-    THREE(3),
-    TWO_PAIRS(2),
-    ONE_PAIR(1),
-    HIGHEST_CARD(0);
-
-    private final int rank;
-
-    HandType(int rank) {
-        this.rank = rank;
-    }
+public enum HandType implements Comparable<HandType> {
+    HIGHEST_CARD,
+    ONE_PAIR,
+    TWO_PAIRS,
+    THREE,
+    FULL_HOUSE,
+    FOUR,
+    FIVE;
 
     public static final HandType type(String hand) {
         return type(hand.chars().boxed().toList());
