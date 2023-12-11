@@ -34,7 +34,7 @@ public enum HandTypeWithJoker implements Comparable<HandTypeWithJoker> {
             } else if (jokers == 2) {
                 return FIVE;
             } else if (jokers == 1) {
-                return FULL_HOUSE;
+                return FOUR;
             } else {
                 if (cardCounts.values().stream().anyMatch(c -> 2 == c)) {
                     return FULL_HOUSE;
