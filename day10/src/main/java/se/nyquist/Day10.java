@@ -3,8 +3,11 @@ package se.nyquist;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -24,14 +27,53 @@ public class Day10 {
                 var lines = new BufferedReader(new InputStreamReader(stream)).lines().filter(not(String::isEmpty)).toList();
                 var map = new GroundMap(lines);
                 var start = findStart(lines);
-                execise1(start, map);
+                var distances = execise1(start, map);
+                exercise2(distances.visited(), map);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void execise1(Point start, GroundMap map) {
+    private static void exercise2(Set<Point> visited, GroundMap map) {
+        Set<Point> remaining = map.subtract(visited);
+        Point borders = map.borders();
+        Set<Point> exterior = new HashSet<>();
+        exterior.addAll(remaining.stream().filter(r -> ! isSurrounded(r, visited, borders)).collect(Collectors.toSet()));
+        int remainingSize = remaining.size();
+        remaining.removeAll(exterior);
+        while(remaining.size() < remainingSize) {
+            var neighbours = remaining.stream().filter(p -> nextToExterior(p,exterior)).collect(Collectors.toSet());
+            exterior.addAll(neighbours);
+            remainingSize = remaining.size();
+            remaining.removeAll(neighbours);
+        }
+        System.out.println("Exercise 2: interior points = " + remaining.size());
+    }
+
+    private static boolean nextToExterior(Point point, Set<Point> exterior) {
+        return Stream.of(new Point(0,1), new Point(0, -1), new Point(-1, 0), new Point(1,0))
+                .anyMatch(delta -> exterior.contains(point.add(delta)));
+    }
+
+    private static boolean isSurrounded(Point point, Set<Point> visited, Point borders) {
+        boolean foundDown = IntStream.range(1,borders.y()-point.y())
+                .mapToObj(point::addY)
+                .anyMatch(visited::contains);
+        boolean foundUp = IntStream.range(point.y()-borders.y()+1,0)
+                .mapToObj(point::addY)
+                .anyMatch(visited::contains);
+        boolean foundLeft = IntStream.range(point.x()-borders.x()+1,0)
+                .mapToObj(point::addX)
+                .anyMatch(visited::contains);
+        boolean foundRight = IntStream.range(1, borders.x()-point.x())
+                .mapToObj(point::addX)
+                .anyMatch(visited::contains);
+
+        return foundRight && foundLeft && foundUp && foundDown;
+    }
+
+    private static Distances execise1(Point start, GroundMap map) {
         List<Point> connected = getConnected(start, map);
         Distances distances = new Distances(start);
         while(! connected.isEmpty()) {
@@ -39,6 +81,7 @@ public class Day10 {
             connected = getConnected(connected, map, distances.visited());
         }
         System.out.println("Exercise 1: max distance " + distances.getMaxDistance() + " " + distances.getMostDistant());
+        return distances;
     }
 
     private static List<Point> getConnected(Point start, GroundMap groundMap) {
