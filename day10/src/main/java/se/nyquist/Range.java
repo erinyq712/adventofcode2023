@@ -16,6 +16,10 @@ public record Range(long start, long length) {
         return previous.start + previous.length == this.start;
     }
 
+    public Range extend(long delta) {
+        return new Range(start,length+delta);
+    }
+
     public Range intersection(Range mapped) {
         if (isOverlapping(mapped)) {
             if (start <= mapped.start) {
@@ -61,5 +65,9 @@ public record Range(long start, long length) {
             current = new ArrayList<>(next);
         }
         return current;
+    }
+
+    public long next() {
+        return start + length;
     }
 }

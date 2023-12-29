@@ -1,6 +1,7 @@
 package se.nyquist;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +15,8 @@ public enum CellType {
     GROUND('.'),
     START('S');
 
+    private static EnumSet<CellType> verticals = EnumSet.of(CellType.VERTICAL, CellType.NORTH_EAST, CellType.NORTH_WEST, CellType.SOUTH_EAST, CellType.SOUTH_WEST);
+    private static EnumSet<CellType> horizontals = EnumSet.of(CellType.HORIZONTAL, CellType.NORTH_EAST, CellType.NORTH_WEST, CellType.SOUTH_EAST, CellType.SOUTH_WEST);
     private final char symbol;
 
     CellType(char c) {
