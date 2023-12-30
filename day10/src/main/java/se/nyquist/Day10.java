@@ -14,6 +14,10 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.function.Predicate.not;
+import static se.nyquist.CellType.canMoveDown;
+import static se.nyquist.CellType.canMoveLeft;
+import static se.nyquist.CellType.canMoveRight;
+import static se.nyquist.CellType.canMoveUp;
 
 public class Day10 {
 
@@ -31,6 +35,7 @@ public class Day10 {
                 var start = findStart(lines);
                 var distances = execise1(start, map);
                 exercise2(distances.visited(), map);
+                exercise3(distances.route(map));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -42,6 +47,21 @@ public class Day10 {
         Set<Point> interior = new HashSet<>();
         interior.addAll(remaining.stream().filter(r -> isInterior(r, visited, map)).collect(Collectors.toSet()));
         System.out.println("Exercise 2: interior points = " + interior.size());
+    }
+
+    private static void exercise3(List<Point> route) {
+        // Shoelace formula: https://en.wikipedia.org/wiki/Shoelace_formula
+        var doubleArea = IntStream.range(0, route.size())
+                .mapToLong(i -> {
+                    var current = route.get(i);
+                    var next = route.get((i+1) % route.size());
+                    return (long) (current.y() + next.y()) * (current.x()-next.x());
+                }).sum();
+        var area = doubleArea/2;
+        // Picks theorem: https://en.wikipedia.org/wiki/Pick%27s_theorem
+        // A = interior point + (boundary points/2) -1
+        var interior = area + 1 - route.size()/2;
+        System.out.println("Exercise 3: interior points = " + interior);
     }
 
     private static boolean isInterior(Point point, Set<Point> visited, GroundMap map) {
@@ -87,13 +107,13 @@ public class Day10 {
 
     private static List<Point> getConnected(Point start, GroundMap groundMap) {
         return Stream.of(new Point(0,1), new Point(0, -1), new Point(-1, 0), new Point(1,0))
-                .filter(p -> isConnected(start, p, groundMap))
+                .filter(p -> groundMap.isConnected(start, p))
                 .map(start::add).toList();
     }
 
     private static List<Point> getConnected(List<Point> border, GroundMap groundMap, Set<Point> visited) {
         return border.stream().flatMap(start -> Stream.of(new Point(0,1), new Point(0, -1), new Point(-1, 0), new Point(1,0))
-                .filter(p -> isConnected(start, p, groundMap))
+                .filter(p -> groundMap.isConnected(start, p))
                 .map(start::add))
                 .distinct()
                 .filter(p -> isNotVisited(p,visited))
@@ -102,61 +122,6 @@ public class Day10 {
 
     private static boolean isNotVisited(Point p, Set<Point> points) {
         return ! points.contains(p);
-    }
-
-
-    private static boolean isConnectedWith(Point start, Point next, GroundMap groundMap) {
-        if (groundMap.contains(next)) {
-            var startCellType = groundMap.get(start.x(), start.y());
-            var cellType = groundMap.get(next);
-            var delta = next.delta(start);
-            if (delta.x() > 1 || delta.y() > 1) {
-                return false;
-            }
-            return switch (Movement.getMovement(delta)) {
-                case UP -> canMoveUp(startCellType, cellType);
-                case DOWN -> canMoveDown(startCellType, cellType);
-                case RIGHT -> canMoveRight(startCellType, cellType);
-                case LEFT -> canMoveLeft(startCellType, cellType);
-            };
-        }
-        return false;
-    }
-
-    private static boolean isConnected(Point start, Point delta, GroundMap groundMap) {
-        if (groundMap.contains(start.add(delta))) {
-            var startCellType = groundMap.get(start.x(), start.y());
-            var cellType = groundMap.get(start.x() + delta.x(), start.y() + delta.y());
-            return switch (Movement.getMovement(delta)) {
-                case UP -> canMoveUp(startCellType, cellType);
-                case DOWN -> canMoveDown(startCellType, cellType);
-                case RIGHT -> canMoveRight(startCellType, cellType);
-                case LEFT -> canMoveLeft(startCellType, cellType);
-            };
-        }
-        return false;
-    }
-
-    private static Set<CellType> upStartCellTypes = Set.of(CellType.START, CellType.VERTICAL, CellType.NORTH_EAST, CellType.NORTH_WEST);
-    private static Set<CellType> upTargetCellTypes = Set.of(CellType.START, CellType.VERTICAL, CellType.SOUTH_EAST, CellType.SOUTH_WEST);
-
-    private static boolean canMoveUp(CellType startCellType, CellType cellType) {
-        return upStartCellTypes.contains(startCellType) && upTargetCellTypes.contains(cellType);
-    }
-
-    private static boolean canMoveDown(CellType startCellType, CellType cellType) {
-        return canMoveUp(cellType, startCellType);
-    }
-
-    private static Set<CellType> rightStartCellTypes = Set.of(CellType.START, CellType.HORIZONTAL, CellType.NORTH_EAST, CellType.SOUTH_EAST);
-    private static Set<CellType> rightTargetCellTypes = Set.of(CellType.START, CellType.HORIZONTAL, CellType.NORTH_WEST, CellType.SOUTH_WEST);
-
-    private static boolean canMoveRight(CellType startCellType, CellType cellType) {
-        return rightStartCellTypes.contains(startCellType) && rightTargetCellTypes.contains(cellType);
-    }
-
-    private static boolean canMoveLeft(CellType startCellType, CellType cellType) {
-        return canMoveRight(cellType, startCellType);
     }
 
     private static Point findStart(List<String> lines) {

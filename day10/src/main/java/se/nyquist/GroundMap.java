@@ -6,6 +6,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static se.nyquist.CellType.canMoveDown;
+import static se.nyquist.CellType.canMoveLeft;
+import static se.nyquist.CellType.canMoveRight;
+import static se.nyquist.CellType.canMoveUp;
+
 public class GroundMap {
     private List<ArrayList<CellType>> map;
 
@@ -39,5 +44,37 @@ public class GroundMap {
 
     public void setCellType(Point start, CellType type) {
         map.get(start.y()).set(start.x(), type);
+    }
+
+    public boolean isConnectedWith(Point start, Point next) {
+        if (contains(next)) {
+            var startCellType = get(start.x(), start.y());
+            var cellType = get(next);
+            var delta = next.delta(start);
+            if (delta.x() > 1 || delta.y() > 1) {
+                return false;
+            }
+            return switch (Movement.getMovement(delta)) {
+                case UP -> canMoveUp(startCellType, cellType);
+                case DOWN -> canMoveDown(startCellType, cellType);
+                case RIGHT -> canMoveRight(startCellType, cellType);
+                case LEFT -> canMoveLeft(startCellType, cellType);
+            };
+        }
+        return false;
+    }
+
+    public boolean isConnected(Point start, Point delta) {
+        if (contains(start.add(delta))) {
+            var startCellType = get(start.x(), start.y());
+            var cellType = get(start.x() + delta.x(), start.y() + delta.y());
+            return switch (Movement.getMovement(delta)) {
+                case UP -> canMoveUp(startCellType, cellType);
+                case DOWN -> canMoveDown(startCellType, cellType);
+                case RIGHT -> canMoveRight(startCellType, cellType);
+                case LEFT -> canMoveLeft(startCellType, cellType);
+            };
+        }
+        return false;
     }
 }
