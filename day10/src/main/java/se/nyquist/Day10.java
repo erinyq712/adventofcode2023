@@ -3,21 +3,15 @@ package se.nyquist;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.function.Predicate.not;
-import static se.nyquist.CellType.canMoveDown;
-import static se.nyquist.CellType.canMoveLeft;
-import static se.nyquist.CellType.canMoveRight;
-import static se.nyquist.CellType.canMoveUp;
 
 public class Day10 {
 

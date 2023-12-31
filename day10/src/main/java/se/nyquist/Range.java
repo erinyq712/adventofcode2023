@@ -1,7 +1,6 @@
 package se.nyquist;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public record Range(long start, long length) {
