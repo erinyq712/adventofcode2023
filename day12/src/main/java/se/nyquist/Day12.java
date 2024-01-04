@@ -1,12 +1,12 @@
 package se.nyquist;
 
-import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -17,7 +17,7 @@ public class Day12 {
 
     public static void main(String[] args) {
         var input = "input.txt";
-        //  var input = "sample.txt";
+        // var input = "sample.txt";
 
         if (args.length > 0) {
             input = args[0];
@@ -50,16 +50,34 @@ public class Day12 {
         if (SpringStatus.UNKNOWN.representedBy(c)) {
             result.addAll(Stream.concat(
                             process(List.of(SpringStatus.OK), brokenCount, current.subList(1, current.size()), errors.subList(1, errors.size())),
-                            process(List.of(SpringStatus.BROKEN), brokenCount-1, current.subList(1, current.size()), errors.subList(1, errors.size())))
+                            processBroken(List.of(), brokenCount, current, errors.subList(1, errors.size())))
                     .toList());
         } else if (SpringStatus.BROKEN.representedBy(c)) {
-            result.addAll(process(List.of(SpringStatus.BROKEN), brokenCount-1, current.subList(1, current.size()), errors.subList(1, errors.size())).toList());
+            result.addAll(processBroken(List.of(), brokenCount, current, errors.subList(1, errors.size())).toList());
         } else {
             result.addAll(process(List.of(SpringStatus.OK), brokenCount, current.subList(1, current.size()), errors.subList(1, errors.size())).toList());
         }
         var results = result.stream().map(l -> l.stream().map(SpringStatus::toChar).collect(Collectors.joining())).distinct().toList();
         results.stream().forEach(System.out::println);
+        results.stream().forEach(s -> Day12.validate(entry,s));
         return results.size();
+    }
+
+    private static Pattern brokenPattern = Pattern.compile("#+");
+    private static void validate(Entry entry, String s) {
+        var matcher = brokenPattern.matcher(s);
+        var current = 0;
+        var entryString = entry.nodes().stream().map(Character::toString).collect(Collectors.joining());
+        if (entryString.length() != s.length()) {
+            throw new RuntimeException("Entry " + entryString + " Length mismatch: " + s);
+        }
+        while(matcher.find()) {
+            if (! entry.errorNodes().get(current).equals(matcher.group().length())) {
+                throw new RuntimeException("Entry " + entryString + " No match of " + entry.errorNodes().get(current) + " with: " + s);
+            }
+            current++;
+        }
+
     }
 
     private static Stream<List<SpringStatus>> process(List<SpringStatus> current, int brokenCount, List<Integer> tail, List<Integer> errors) {
