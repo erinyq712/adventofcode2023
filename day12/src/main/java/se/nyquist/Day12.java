@@ -122,8 +122,12 @@ public class Day12 {
             if (errors.isEmpty()) {
                 int remaining = tail.size()-brokenCount-1;
                 if (remaining > 0) {
-                    var okStream = IntStream.range(0, remaining).mapToObj(i -> SpringStatus.OK);
-                    return Stream.of(Stream.concat(currentList.stream(), okStream).toList());
+                    if (tail.subList(tail.size()-remaining,tail.size()).stream().noneMatch(SpringStatus.BROKEN::representedBy)) {
+                        var okStream = IntStream.range(0, remaining).mapToObj(i -> SpringStatus.OK);
+                        return Stream.of(Stream.concat(currentList.stream(), okStream).toList());
+                    } else {
+                        return Stream.of();
+                    }
                 } else {
                     return Stream.of(currentList.stream().toList());
                 }
