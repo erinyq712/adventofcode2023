@@ -26,9 +26,9 @@ public class Day12 {
             if (stream != null) {
                 var lines = new BufferedReader(new InputStreamReader(stream)).lines().filter(not(String::isEmpty)).toList();
                 {
-                    // var entries = createEntries(lines, 5);
-                    // List<Integer> result = compute(entries);
-                    // System.out.println("Exercise 1: " + result.stream().mapToInt(Integer::intValue).sum());
+                    var entries = createEntries(lines, 1);
+                    List<Integer> result = compute(entries);
+                    System.out.println("Exercise 1: " + result.stream().mapToInt(Integer::intValue).sum());
                 }
                 {
                     var entries = createEntries(lines, 5);
@@ -65,8 +65,8 @@ public class Day12 {
             result.addAll(process(List.of(SpringStatus.OK), brokenCount, current.subList(1, current.size()), errors.subList(1, errors.size())).toList());
         }
         var results = result.stream().map(l -> l.stream().map(SpringStatus::toChar).collect(Collectors.joining())).distinct().toList();
-        results.stream().forEach(System.out::println);
-        results.stream().forEach(s -> Day12.validate(entry,s));
+        // results.stream().forEach(System.out::println);
+        // results.stream().forEach(s -> Day12.validate(entry,s));
         return results.size();
     }
 
