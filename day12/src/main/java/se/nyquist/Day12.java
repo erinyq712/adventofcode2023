@@ -16,8 +16,8 @@ import static java.util.function.Predicate.not;
 public class Day12 {
 
     public static void main(String[] args) {
-        var input = "input.txt";
-        // var input = "sample.txt";
+        // var input = "input.txt";
+        var input = "sample.txt";
 
         if (args.length > 0) {
             input = args[0];
@@ -25,16 +25,23 @@ public class Day12 {
         try (var stream = Day12.class.getClassLoader().getResourceAsStream(input)) {
             if (stream != null) {
                 var lines = new BufferedReader(new InputStreamReader(stream)).lines().filter(not(String::isEmpty)).toList();
-                var entries = createEntries(lines);
-                List<Integer> result = exercise1(entries);
-                System.out.println("Exercise 1: " + result.stream().mapToInt(Integer::intValue).sum());
+                {
+                    // var entries = createEntries(lines, 5);
+                    // List<Integer> result = compute(entries);
+                    // System.out.println("Exercise 1: " + result.stream().mapToInt(Integer::intValue).sum());
+                }
+                {
+                    var entries = createEntries(lines, 5);
+                    var result = compute(entries);
+                    System.out.println("Exercise 2: " + result.stream().mapToInt(Integer::intValue).sum());
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static List<Integer> exercise1(List<Entry> entries) {
+    private static List<Integer> compute(List<Entry> entries) {
         return entries.stream().map(Day12::process).toList();
     }
 
@@ -138,11 +145,14 @@ public class Day12 {
         }
     }
 
-    private static List<Entry> createEntries(List<String> lines) {
+    private static List<Entry> createEntries(List<String> lines, int count) {
         return lines.stream().map(line -> {
             var parts = line.split(" ");
-            var nodes = parts[0].trim().chars().boxed().toList();
-            var errors = Arrays.stream(parts[1].trim().split(",")).map(Integer::parseInt).toList();
+            var base = parts[0].trim();
+            var nodes = (base + ("?" +base).repeat(count-1)).chars().boxed().toList();
+            var errorBase = parts[1].trim();
+            var errorStr = errorBase + ("," + errorBase).repeat(count-1);
+            var errors = Arrays.stream(errorStr.split(",")).map(Integer::parseInt).toList();
             return new Entry(nodes,errors);
         }).toList();
     }
