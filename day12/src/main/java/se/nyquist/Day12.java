@@ -16,8 +16,8 @@ import static java.util.function.Predicate.not;
 public class Day12 {
 
     public static void main(String[] args) {
-        // var input = "input.txt";
-        var input = "sample.txt";
+        var input = "input.txt";
+        // var input = "sample.txt";
 
         if (args.length > 0) {
             input = args[0];
@@ -49,25 +49,22 @@ public class Day12 {
         if (entry.errorNodes().isEmpty()) {
             return 0;
         }
-        List<List<SpringStatus>> result = new ArrayList<>();
+        int result = 0;
         var errors = entry.errorNodes();
         var brokenCount = errors.getFirst();
         var current = entry.nodes();
         int c = current.getFirst();
         if (SpringStatus.UNKNOWN.representedBy(c)) {
-            result.addAll(Stream.concat(
+            result = Stream.concat(
                             process(List.of(SpringStatus.OK), brokenCount, current.subList(1, current.size()), errors.subList(1, errors.size())),
                             processBroken(List.of(), brokenCount, current, errors.subList(1, errors.size())))
-                    .toList());
+                    .reduce(Integer::sum).orElse(0);
         } else if (SpringStatus.BROKEN.representedBy(c)) {
-            result.addAll(processBroken(List.of(), brokenCount, current, errors.subList(1, errors.size())).toList());
+            result = processBroken(List.of(), brokenCount, current, errors.subList(1, errors.size())).reduce(Integer::sum).orElse(0);
         } else {
-            result.addAll(process(List.of(SpringStatus.OK), brokenCount, current.subList(1, current.size()), errors.subList(1, errors.size())).toList());
+            result = process(List.of(SpringStatus.OK), brokenCount, current.subList(1, current.size()), errors.subList(1, errors.size())).reduce(Integer::sum).orElse(0);
         }
-        var results = result.stream().map(l -> l.stream().map(SpringStatus::toChar).collect(Collectors.joining())).distinct().toList();
-        // results.stream().forEach(System.out::println);
-        // results.stream().forEach(s -> Day12.validate(entry,s));
-        return results.size();
+        return result;
     }
 
     private static Pattern brokenPattern = Pattern.compile("#+");
@@ -87,7 +84,7 @@ public class Day12 {
 
     }
 
-    private static Stream<List<SpringStatus>> process(List<SpringStatus> current, int brokenCount, List<Integer> tail, List<Integer> errors) {
+    private static Stream<Integer> process(List<SpringStatus> current, int brokenCount, List<Integer> tail, List<Integer> errors) {
         List<List<SpringStatus>> result = new ArrayList<>();
         if (tail.isEmpty()) {
             return Stream.of();
@@ -108,15 +105,13 @@ public class Day12 {
         }
     }
 
-    private static Stream<List<SpringStatus>> processBroken(List<SpringStatus> current, int brokenCount, List<Integer> tail, List<Integer> errors) {
+    private static Stream<Integer> processBroken(List<SpringStatus> current, int brokenCount, List<Integer> tail, List<Integer> errors) {
         if (brokenCount > 0 && tail.subList(0,brokenCount).stream().anyMatch(SpringStatus.OK::representedBy)) {
             // Invalid count of broken
             return Stream.of();
         } else if (brokenCount == tail.size()) {
             if (errors.isEmpty()) {
-                var brokenStream = IntStream.range(0, brokenCount).mapToObj(i -> SpringStatus.BROKEN);
-                var currentList = Stream.concat(current.stream(), brokenStream).toList();
-                return Stream.of(currentList);
+                return Stream.of(1);
             } else {
                 return Stream.of();
             }
@@ -131,12 +126,12 @@ public class Day12 {
                 if (remaining > 0) {
                     if (tail.subList(tail.size()-remaining,tail.size()).stream().noneMatch(SpringStatus.BROKEN::representedBy)) {
                         var okStream = IntStream.range(0, remaining).mapToObj(i -> SpringStatus.OK);
-                        return Stream.of(Stream.concat(currentList.stream(), okStream).toList());
+                        return Stream.of(1);
                     } else {
                         return Stream.of();
                     }
                 } else {
-                    return Stream.of(currentList.stream().toList());
+                    return Stream.of(1);
                 }
             } else {
                 var nextBroken = errors.getFirst();
