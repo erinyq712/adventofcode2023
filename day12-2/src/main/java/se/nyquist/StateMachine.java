@@ -51,21 +51,19 @@ public class StateMachine {
     }
 
     public void process(int c) {
-        final int minCounter = getMinCounter();
-        positions = positions.stream().flatMap(p -> p.getNext(c,this).stream()
-                .filter(f -> f.counter() >= minCounter)
-                .filter(f -> f.current() < states.size())).toList();
+        var plist =  positions.stream().flatMap(p -> p.getNext(c,this).stream()
+                .filter(f -> f.current() < states.size()))
+                .collect(Collectors.groupingBy(State.Position::current));
+        positions = plist.entrySet().stream().map(p -> new State.Position(p.getKey(),
+                p.getValue().get(0).counter(),
+                p.getValue().stream().map(State.Position::positions).reduce(Long::sum).orElse(0L))).toList();
     }
 
     public long combinations() {
         input.chars().forEach(this::process);
-        var headPositions = positions.stream()
-                .filter(p -> p.counter()==counter)
-                .collect(Collectors.groupingBy(State.Position::current));
-        return headPositions.keySet().stream()
-                .filter(key -> key == states.size()-2 || key == states.size()-1)
-                .map(headPositions::get)
-                .mapToLong(Collection::size)
+        return positions.stream()
+                .filter(p -> p.current() == states.size()-2 || p.current() == states.size()-1)
+                .mapToLong(State.Position::positions)
                 .reduce(Long::sum).orElse(0L);
     }
 

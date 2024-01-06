@@ -25,16 +25,20 @@ public class State {
         return this;
     }
 
-    public static record Position(int current, int counter) {
+    public static record Position(int current, int counter, long positions) {
+
+        public Position(int current, int counter) {
+            this(current,counter,1L);
+        }
 
         List<Position> getNext(int c, StateMachine stateMachine) {
             var currentState = stateMachine.get(current);
             return switch(currentState.getNext(c)) {
-                case FOUND -> List.of(new Position(current+1, counter+1));
+                case FOUND -> List.of(new Position(current+1, counter+1, positions));
                 case STAY -> List.of(this);
-                case SPLITANDFOUND -> List.of(this, new Position(current+1, counter+1));
-                case SPLIT -> List.of(this, new Position(current+1, counter));
-                case NEXT -> List.of(new Position(current+1, counter));
+                case SPLITANDFOUND -> List.of(this, new Position(current+1, counter+1, positions));
+                case SPLIT -> List.of(this, new Position(current+1, counter, positions));
+                case NEXT -> List.of(new Position(current+1, counter, positions));
                 default -> List.of();
             };
         }
